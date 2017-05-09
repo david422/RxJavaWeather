@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">RxJavaWeather</string>
+    <string name="base_url">http://api.wunderground.com/api/%s/</string>
+    <string name="no_cities">Brak dodanych miast</string>
+    <string name="search_cities">Szukanie miast</string>
+    <string name="ok">Ok</string>
+    <string name="autocomplete_endpoint">http://autocomplete.wunderground.com/</string>
+    <string name="submit">Zatwierdź</string>
+
+    <string name="temperature">Temperatura: %s \u00B0C</string>
+    <string name="time">Czas: %s </string>
+    <string name="wind_speed">Prędkość wiatru: %s km/s</string>
+    <string name="pressure">Ciśnienie: %s hPa</string>
+    <string name="visibility_distance">Widoczność: %s km</string>
+    <string name="error_occured_during_search">Wystąpił błąd podczas wyszukiwania</string>
+</resources>

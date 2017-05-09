@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.pgssoft.rxjavaweather.ui.add.AddViewModel"/>
+    </data>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/search_toolbar"
+            android:id="@+id/toolbar_layout"
+            app:searchViewModel="@{viewModel.getSearchViewModel()}"/>
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/toolbar_layout"
+            android:layout_above="@+id/submit_search">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Brak miast"
+                android:visibility="@{!viewModel.getRecyclerviewVisible()}"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/cityRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                />
+
+        </FrameLayout>
+
+        <Button
+            android:id="@id/submit_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:onClick="@{()->viewModel.submit()}"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+</layout>
