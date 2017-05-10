@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.pgssoft.rxjavaweather.R;
+import com.pgssoft.rxjavaweather.RXApp;
 import com.pgssoft.rxjavaweather.databinding.ActivityMainBinding;
 import com.pgssoft.rxjavaweather.model.city.City;
 import com.pgssoft.rxjavaweather.ui.BaseActivity;
@@ -31,7 +32,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        viewModel = new MainViewModel();
+        viewModel = new MainViewModel(RXApp.getInstance().getApi(), RXApp.getInstance().getDbManager());
         binding.setViewModel(viewModel);
 
         setSupportActionBar(binding.toolbarLayout.toolbar);

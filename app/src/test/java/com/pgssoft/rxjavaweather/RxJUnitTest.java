@@ -24,6 +24,7 @@ public class RxJUnitTest {
     public void setUp(){
 
         MockitoAnnotations.initMocks(this);
+
         Scheduler immediate = new Scheduler() {
             @Override
             public Worker createWorker() {

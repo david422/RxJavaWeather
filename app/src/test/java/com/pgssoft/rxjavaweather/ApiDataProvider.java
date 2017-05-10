@@ -28,11 +28,11 @@ public class ApiDataProvider {
         City city5 = new City(null, "Rzesin, Poland", "Europe/Warsaw", "00000.198.12210", "53.889999 15.120000", null);
         Collections.addAll(allCities, city1, city2, city3, city4, city5);
 
-        Condition warsawCondition = new Condition(null, new DateTime(), "Partly Cloudy", "24.0", "From the NW at 2.2 MPH Gusting to 3.8 MPH", "NW", "3.5", "1018", "10.0", "http://icons.wxug.com/i/c/k/partlycloudy.gif", 0);
-        Condition warangalCondition = new Condition(null, new DateTime(), "Overcast", "10.5", "From the SSW at 6.2 MPH Gusting to 9.3 MPH", "SSW", "10.5", "1020", "10.0", "http://icons.wxug.com/i/c/k/cloudy.gif", 0);
-        Condition warriCondition = new Condition(null, new DateTime(), "Partly Cloudy", "30", "From the South at 7 MPH", "South", "11", "1012", "10.0", "http://icons.wxug.com/i/c/k/partlycloudy.gif", 0);
-        Condition rzeszowCondition = new Condition(null, new DateTime(), "Rain", "12.2", "Calm", "SSW", "1.4", "1007", "10.0", "http://icons.wxug.com/i/c/k/rain.gif", 0);
-        Condition rzesinCondition = new Condition(null, new DateTime(), "Mostly Cloudy", "8.2", "From the West at 3.1 MPH Gusting to 6.8 MPH", "West", "5.0", "1017", "10.0", "http://icons.wxug.com/i/c/k/mostlycloudy.gif", 0);
+        Condition warsawCondition = new Condition(null, null, "Partly Cloudy", "24.0", "From the NW at 2.2 MPH Gusting to 3.8 MPH", "NW", "3.5", "1018", "10.0", "http://icons.wxug.com/i/c/k/partlycloudy.gif", 0);
+        Condition warangalCondition = new Condition(null, null, "Overcast", "10.5", "From the SSW at 6.2 MPH Gusting to 9.3 MPH", "SSW", "10.5", "1020", "10.0", "http://icons.wxug.com/i/c/k/cloudy.gif", 0);
+        Condition warriCondition = new Condition(null, null, "Partly Cloudy", "30", "From the South at 7 MPH", "South", "11", "1012", "10.0", "http://icons.wxug.com/i/c/k/partlycloudy.gif", 0);
+        Condition rzeszowCondition = new Condition(null, null, "Rain", "12.2", "Calm", "SSW", "1.4", "1007", "10.0", "http://icons.wxug.com/i/c/k/rain.gif", 0);
+        Condition rzesinCondition = new Condition(null, null, "Mostly Cloudy", "8.2", "From the West at 3.1 MPH Gusting to 6.8 MPH", "West", "5.0", "1017", "10.0", "http://icons.wxug.com/i/c/k/mostlycloudy.gif", 0);
 
         citiesCondition.put("00000.123.12372", warsawCondition);
         citiesCondition.put("00000.1.43087", warangalCondition);

@@ -3,10 +3,12 @@ package com.pgssoft.rxjavaweather.ui.main;
 import android.databinding.ObservableBoolean;
 
 import com.jakewharton.rxrelay2.PublishRelay;
-import com.pgssoft.rxjavaweather.RXApp;
+import com.pgssoft.rxjavaweather.DBManager;
+import com.pgssoft.rxjavaweather.api.Api;
 import com.pgssoft.rxjavaweather.api.WeatherService;
 import com.pgssoft.rxjavaweather.model.city.City;
 import com.pgssoft.rxjavaweather.model.condition.Condition;
+import com.pgssoft.rxjavaweather.model.condition.ConditionResponse;
 import com.pgssoft.rxjavaweather.ui.OpenActivityEvent;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
+import io.reactivex.SingleTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
@@ -37,26 +41,46 @@ public class MainViewModel {
 
     private WeatherService weatherService;
 
-    public MainViewModel() {
+    private DBManager dbManager;
 
-        weatherService = RXApp.getInstance().getApi().getWeatherService();
+    private class NetworkResponse<T> {
+
+    }
+
+    SingleTransformer<ConditionResponse,Condition> networkTransformer = new SingleTransformer<ConditionResponse,Condition>() {
+        @Override
+        public SingleSource<Condition> apply(@NonNull Single<ConditionResponse> upstream) {
+            return upstream.map(ConditionResponse::getCondition);
+        }
+    };
+
+
+    public MainViewModel(Api api, DBManager dbManager) {
+
+        this.dbManager = dbManager;
+        weatherService = api.getWeatherService();
         updateAndShowWeather();
+
+
     }
 
     public void updateAndShowWeather() {
-        RXApp.getInstance().getDbManager().getCityHelper().getCities()
+
+
+        dbManager.getCityHelper().getCities()
                 .doOnNext(cl -> Timber.d("Thread: " + Thread.currentThread().getName()))
                 .flatMapSingle(city ->
                         //get conditions for specific city, put it into the db and update city object
                         weatherService.getWeather(city.getFullPath())
-                                .map(conditionResponse -> {
-                                    Condition condition = conditionResponse.getCondition();
+                                .compose(networkTransformer)
+                                .map(condition -> {
+//                                    Condition condition = conditionResponse.getCondition();
                                     condition.setCityId(city.getId());
                                     return condition;
                                 })
-                                .flatMap(condition -> RXApp.getInstance().getDbManager().getConditionHelper().insertOrUpdateCondition(condition))
+                                .flatMap(condition -> dbManager.getConditionHelper().insertOrUpdateCondition(condition))
                                 .doOnSuccess(condition -> {
-                                    if (city.getConditionId() == null){
+                                    if (city.getConditionId() == null) {
                                         city.setCondition(condition);
                                         city.update();
                                     } else {

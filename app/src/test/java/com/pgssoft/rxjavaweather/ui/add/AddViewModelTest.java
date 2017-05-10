@@ -17,7 +17,6 @@ import com.pgssoft.rxjavaweather.ui.ProgressEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +45,16 @@ public class AddViewModelTest extends RxJUnitTest{
     private AddViewModel addViewModel;
 
     @Mock
-    private Api api;
+    Api api;
 
     @Mock
-    private DBManager dbManager;
+    DBManager dbManager;
 
     @Mock
-    private SearchServcie searchService;
+    SearchServcie searchService;
 
     @Mock
-    private CitySearchResponse citySearchResponse;
+    CitySearchResponse citySearchResponse;
 
     @Mock
     CityHelper cityHelper;
@@ -69,8 +68,6 @@ public class AddViewModelTest extends RxJUnitTest{
         super.setUp();
 
 
-        searchService = mock(SearchServcie.class);
-        citySearchResponse = mock(CitySearchResponse.class);
         when(dbManager.getCityHelper()).thenReturn(cityHelper);
 
 
@@ -250,7 +247,7 @@ public class AddViewModelTest extends RxJUnitTest{
         //prepare
         TestObserver<List<AddViewModel.CityViewModel>> cvmList = addViewModel.getCitiesObservable().test();
         List<City> localDBCities =  allCities.stream()
-                .filter(city -> city.getName().equals("Warsaw, Poland") || city.getName().equals("Rzeżyca, Łotwa"))
+                .filter(city -> city.getName().equals("Warsaw, Poland") || city.getName().equals("Rzeszów, Polska"))
                 .collect(Collectors.toList());
         when(cityHelper.getCities()).thenReturn(Flowable.fromIterable(localDBCities));
 
@@ -265,7 +262,7 @@ public class AddViewModelTest extends RxJUnitTest{
         cvmList.assertValueAt(0, list -> {
             boolean isProperVMSelected = false;
             for (AddViewModel.CityViewModel cityVm: list){
-                if (cityVm.city.getName().equals("Rzeżyca, Łotwa") && cityVm.checkObservable.get()){
+                if (cityVm.city.getName().equals("Rzeszów, Polska") && cityVm.checkObservable.get()){
                     isProperVMSelected = true;
                     break;
                 }

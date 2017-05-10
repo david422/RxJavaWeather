@@ -13,6 +13,7 @@ import com.pgssoft.rxjavaweather.ui.ProgressEvent;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
@@ -92,7 +93,9 @@ public class AddViewModel implements SearchViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(e -> {
-                    e.printStackTrace();
+                    if (!(e instanceof TimeoutException)) {
+                        e.printStackTrace();
+                    }
                     progressRelay.accept(new ProgressEvent(ProgressEvent.CLOSE));
                     progressRelay.accept(new ProgressEvent(ProgressEvent.ERROR, R.string.error_occured_during_search));
                 })
