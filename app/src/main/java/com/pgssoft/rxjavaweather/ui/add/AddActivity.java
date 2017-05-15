@@ -11,17 +11,13 @@ import android.support.v7.widget.LinearLayoutManager;
 
 import com.pgssoft.rxjavaweather.R;
 import com.pgssoft.rxjavaweather.RXApp;
-import com.pgssoft.rxjavaweather.api.Api;
 import com.pgssoft.rxjavaweather.databinding.ActivityAddBinding;
 import com.pgssoft.rxjavaweather.ui.ProgressEvent;
-
-import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by dpodolak on 18.04.2017.
@@ -55,31 +51,9 @@ public class AddActivity extends AppCompatActivity {
 
         binding.cityRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        viewModel.getCitiesObservable()
+        compositeDisposable.add(viewModel.getCitiesObservable()
                 .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<AddViewModel.CityViewModel>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onNext(List<AddViewModel.CityViewModel> cities) {
-                        adapter.setCityList(cities);
-                        adapter.notifyDataSetChanged();
-                        binding.cityRecyclerView.invalidate();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+                .subscribe(adapter));
 
         viewModel.getProgressObservable()
                 .observeOn(AndroidSchedulers.mainThread())
@@ -101,7 +75,7 @@ public class AddActivity extends AppCompatActivity {
                             break;
 
                             case ProgressEvent.CLOSE: {
-                                if (progressDialog != null){
+                                if (progressDialog != null) {
                                     progressDialog.dismiss();
                                     progressDialog = null;
                                 }
@@ -110,7 +84,7 @@ public class AddActivity extends AppCompatActivity {
 
                             case ProgressEvent.ERROR: {
                                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(AddActivity.this);
-                                if (progressEvent.getMessage(AddActivity.this) != null){
+                                if (progressEvent.getMessage(AddActivity.this) != null) {
                                     alertDialog.setMessage(progressEvent.getMessage(AddActivity.this));
                                 }
                                 alertDialog.setPositiveButton(R.string.ok, null);

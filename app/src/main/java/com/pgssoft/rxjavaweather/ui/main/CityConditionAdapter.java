@@ -13,11 +13,14 @@ import com.pgssoft.rxjavaweather.model.city.City;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+
 /**
  * Created by dpodolak on 04.05.2017.
  */
 
-public class CityConditionAdapter extends RecyclerView.Adapter<CityConditionAdapter.CityConditionViewHolder> {
+public class CityConditionAdapter extends RecyclerView.Adapter<CityConditionAdapter.CityConditionViewHolder> implements Consumer<List<City>> {
 
     private LayoutInflater inflater;
     private List<City> cities = new ArrayList();
@@ -42,7 +45,8 @@ public class CityConditionAdapter extends RecyclerView.Adapter<CityConditionAdap
         return cities.size();
     }
 
-    public void setCities(List<City> cities){
+    @Override
+    public void accept(@NonNull List<City> cities) throws Exception {
         this.cities = cities;
         notifyDataSetChanged();
     }

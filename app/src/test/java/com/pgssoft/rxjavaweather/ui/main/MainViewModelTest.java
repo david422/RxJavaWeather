@@ -79,7 +79,6 @@ public class MainViewModelTest extends RxJUnitTest {
         when(conditionHelper.insertOrUpdateCondition(any(Condition.class))).then(new Answer<Single<Condition>>() {
             @Override
             public Single<Condition> answer(InvocationOnMock invocationOnMock) throws Throwable {
-
                 return Single.just((Condition) invocationOnMock.getMock());
             }
         });

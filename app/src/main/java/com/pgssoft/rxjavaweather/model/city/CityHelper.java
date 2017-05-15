@@ -10,7 +10,6 @@ import java.util.List;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-
 /**
  * Created by dpodolak on 13.04.2017.
  */
@@ -26,7 +25,7 @@ public class CityHelper {
 
     public Completable insert(City city) {
         return Completable.create(e -> {
-            cityDao.insertInTx(city);
+            cityDao.insert(city);
             e.onComplete();
         });
     }

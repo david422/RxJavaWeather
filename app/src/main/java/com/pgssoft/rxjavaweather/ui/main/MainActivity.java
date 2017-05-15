@@ -66,33 +66,13 @@ public class MainActivity extends BaseActivity {
         binding.cityConditionRecyclerView.setAdapter(cityConditionAdapter);
 
 
-        viewModel.citiesObservable()
-                .subscribe(new Observer<List<City>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onNext(List<City> cities) {
-                        cityConditionAdapter.setCities(cities);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+        compositeDisposable.add(viewModel.citiesObservable()
+                .subscribe(cityConditionAdapter));
 
     }
 
     private void openActivity(OpenActivityEvent openActivityEvent) {
-        switch (openActivityEvent.getActivity()){
+        switch (openActivityEvent.getActivity()) {
             case OpenActivityEvent.AddActivity:
                 startActivityForResult(new Intent(this, AddActivity.class), ADD_CITY_REQUEST);
         }
@@ -100,7 +80,7 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ADD_CITY_REQUEST && resultCode == RESULT_OK){
+        if (requestCode == ADD_CITY_REQUEST && resultCode == RESULT_OK) {
             viewModel.updateAndShowWeather();
         }
     }

@@ -20,12 +20,13 @@ import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
+import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by dpodolak on 13.04.2017.
@@ -59,37 +60,38 @@ public class AddViewModel implements SearchViewModel {
         Flowable<City> localCityObserable = dbManager.getCityHelper().getCities();
 
         Observable.create((ObservableOnSubscribe<String>) e ->
+                //listen for every change
                 searchObservable.addOnPropertyChangedCallback(new android.databinding.Observable.OnPropertyChangedCallback() {
                     @Override
                     public void onPropertyChanged(android.databinding.Observable observable, int i) {
-                        Timber.d("Query for search " + searchObservable.get());
                         e.onNext(searchObservable.get());
                     }
                 }))
-                .filter(query -> query.length() > 2)
-                .debounce(CLICK_DEBOUNCE_TIME, TimeUnit.MILLISECONDS)
-                .doOnNext(string -> progressRelay.accept(new ProgressEvent(ProgressEvent.SHOW, R.string.search_cities)))
-                .flatMapSingle(api.getSearchService()::searchCity)
-                .map(CitySearchResponse::getCities)
-                .flatMapSingle(cities -> Observable.fromIterable(cities)
-                        .map(city -> new CityViewModel(cityClickRelay, city))
-                        .toList()
+                .filter(query -> query.length() > 2) // query have to contains at least 2 chars
+                .debounce(CLICK_DEBOUNCE_TIME, TimeUnit.MILLISECONDS) // if query not change for 500ms
+                .doOnNext(string -> progressRelay.accept(new ProgressEvent(ProgressEvent.SHOW, R.string.search_cities))) //show progress bar
+                .flatMapSingle(api.getSearchService()::searchCity) //get cities for this query
+                .map(CitySearchResponse::getCities) // get city list from response
+                .flatMapSingle(cities -> Observable.fromIterable(cities) //emity city one by one
+                        .map(city -> new CityViewModel(cityClickRelay, city)) //wrap city to cityViewModel
+                        .toList() //catch all cityViewModels to list
                         .flatMap(cityVMList ->
 
                                 //if in local exists city which is on list, set checkbox
                                 localCityObserable
-                                        .toObservable()
-                                        .doOnNext(city -> {
+                                        .doOnNext(city -> { //if some city from search is current in local database, check it in viewmodel
                                             for (CityViewModel cvm : cityVMList) {
                                                 if (cvm.city.equals(city)) {
                                                     cvm.checkObservable.set(true);
                                                 }
                                             }
                                         })
-                                        .lastElement()
-                                        .toSingle()
-                                        .map(c -> cityVMList))
+                                        .lastOrError() //wait for last element or return error
+                                        .map(c -> cityVMList) // if it is last element, return cityVMList
+                                        .onErrorResumeNext(e -> Single.just(cityVMList)) // handle above error NoSuchElementException, return also cityVMList
+                        )
                 )
+
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(e -> {
@@ -99,7 +101,7 @@ public class AddViewModel implements SearchViewModel {
                     progressRelay.accept(new ProgressEvent(ProgressEvent.CLOSE));
                     progressRelay.accept(new ProgressEvent(ProgressEvent.ERROR, R.string.error_occured_during_search));
                 })
-                .retry()
+                .retry() //if occur any error, subscribe observable again
                 .subscribe(new Observer<List<CityViewModel>>() {
                     @Override
                     public void onSubscribe(Disposable d) {

@@ -66,28 +66,27 @@ public class MainViewModel {
 
     public void updateAndShowWeather() {
 
-
         dbManager.getCityHelper().getCities()
                 .doOnNext(cl -> Timber.d("Thread: " + Thread.currentThread().getName()))
-                .flatMapSingle(city ->
+                .flatMapSingle(someCity ->
                         //get conditions for specific city, put it into the db and update city object
-                        weatherService.getWeather(city.getFullPath())
+                        weatherService.getWeather(someCity.getFullPath())
                                 .compose(networkTransformer)
                                 .map(condition -> {
 //                                    Condition condition = conditionResponse.getCondition();
-                                    condition.setCityId(city.getId());
+                                    condition.setCityId(someCity.getId());
                                     return condition;
                                 })
                                 .flatMap(condition -> dbManager.getConditionHelper().insertOrUpdateCondition(condition))
                                 .doOnSuccess(condition -> {
-                                    if (city.getConditionId() == null) {
-                                        city.setCondition(condition);
-                                        city.update();
+                                    if (someCity.getConditionId() == null) {
+                                        someCity.setCondition(condition);
+                                        someCity.update();
                                     } else {
-                                        city.refresh();
+                                        someCity.refresh();
                                     }
-                                }).map(condition -> city)
-                                .onErrorResumeNext(e -> Single.just(city)))
+                                }).map(condition -> someCity)
+                                .onErrorResumeNext(e -> Single.just(someCity)))
                 .toList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -12,11 +12,13 @@ import com.pgssoft.rxjavaweather.databinding.ItemCityBinding;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.functions.Consumer;
+
 /**
  * Created by dawidpodolak on 27.04.2017.
  */
 
-public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHoler> {
+public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHoler> implements Consumer<List<AddViewModel.CityViewModel>> {
 
     private List<AddViewModel.CityViewModel> citiesViewModel = new ArrayList<>();
 
@@ -42,9 +44,12 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHoler>
         return citiesViewModel.size();
     }
 
-    public void setCityList(List<AddViewModel.CityViewModel> cities){
-        citiesViewModel = cities;
+    @Override
+    public void accept(List<AddViewModel.CityViewModel> cityViewModels) {
+        citiesViewModel = cityViewModels;
+        notifyDataSetChanged();
     }
+
 
     static class CityViewHoler extends RecyclerView.ViewHolder{
 
