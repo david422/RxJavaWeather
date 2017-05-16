@@ -23,30 +23,37 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by dpodolak on 13.04.2017.
  */
-
 public class MainViewModel {
 
+    /**
+     * Flag which hide or show placeholder and recyclerView
+     */
     public ObservableBoolean placeholderVisible = new ObservableBoolean(true);
 
+    /**
+     * Emit lists with cities to show
+     */
     private PublishRelay<List<City>> citiesPublish = PublishRelay.create();
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    /**
+     * Emit events in order open proper activity
+     */
     private PublishRelay<OpenActivityEvent> openActivityRelay = PublishRelay.create();
 
     private WeatherService weatherService;
 
     private DBManager dbManager;
 
-    private class NetworkResponse<T> {
 
-    }
-
+    /**
+     * Convert ConditionResponse into condition
+     */
     SingleTransformer<ConditionResponse,Condition> networkTransformer = new SingleTransformer<ConditionResponse,Condition>() {
         @Override
         public SingleSource<Condition> apply(@NonNull Single<ConditionResponse> upstream) {
@@ -64,30 +71,32 @@ public class MainViewModel {
 
     }
 
+    /**
+     * Get cities from db -> update wheater for thos cities and pass it to view
+     */
     public void updateAndShowWeather() {
 
-        dbManager.getCityHelper().getCities()
-                .doOnNext(cl -> Timber.d("Thread: " + Thread.currentThread().getName()))
+        dbManager.getCityHelper().getCities() //read cities from db
                 .flatMapSingle(someCity ->
+
                         //get conditions for specific city, put it into the db and update city object
                         weatherService.getWeather(someCity.getFullPath())
-                                .compose(networkTransformer)
+                                .compose(networkTransformer) // it could be replace by map, but it is made for test purpose
                                 .map(condition -> {
-//                                    Condition condition = conditionResponse.getCondition();
                                     condition.setCityId(someCity.getId());
                                     return condition;
-                                })
-                                .flatMap(condition -> dbManager.getConditionHelper().insertOrUpdateCondition(condition))
-                                .doOnSuccess(condition -> {
+                                }) //put cityId in to condition
+                                .flatMap(condition -> dbManager.getConditionHelper().insertOrUpdateCondition(condition)) // add or update condition to db, it's not required but added for test purpose
+                                .doOnSuccess(condition -> { //put condition id in to the city and update
                                     if (someCity.getConditionId() == null) {
                                         someCity.setCondition(condition);
                                         someCity.update();
                                     } else {
                                         someCity.refresh();
                                     }
-                                }).map(condition -> someCity)
-                                .onErrorResumeNext(e -> Single.just(someCity)))
-                .toList()
+                                }).map(condition -> someCity) // return city again
+                                .onErrorResumeNext(e -> Single.just(someCity))) // if error
+                .toList() //catch all cities (with actual wheather) in to a list
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<List<City>>() {
@@ -110,6 +119,9 @@ public class MainViewModel {
                 });
     }
 
+    /**
+     * open activity to add cities
+     */
     public void addActivity() {
         openActivityRelay.accept(new OpenActivityEvent(OpenActivityEvent.AddActivity));
     }

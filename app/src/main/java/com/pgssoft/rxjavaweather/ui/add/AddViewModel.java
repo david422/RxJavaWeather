@@ -15,18 +15,15 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 
 /**
  * Created by dpodolak on 13.04.2017.
@@ -34,22 +31,43 @@ import io.reactivex.subjects.PublishSubject;
 
 public class AddViewModel implements SearchViewModel {
 
+    /**
+     * Delay between typing chars, trigger query to API
+     */
     public static final int CLICK_DEBOUNCE_TIME = 500;
 
-    private ObservableBoolean recyclerviewVisible = new ObservableBoolean(false);
+    /**
+     * Cause that recycler view with result appear or disappear
+     */
+    private ObservableBoolean recyclerViewVisible = new ObservableBoolean(false);
 
+    /**
+     * Stream to notify View with appriopriate progress Bar event
+     */
     private PublishRelay<ProgressEvent> progressRelay = PublishRelay.create();
 
+    /**
+     * Stream passing new results to show
+     */
     private PublishRelay<List<CityViewModel>> citiesRelay = PublishRelay.create();
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private ObservableField<String> searchObservable = new ObservableField<>();
+    /**
+     * Listening for changes in search
+     */
+    private ObservableField<String> searchObservable = new ObservableField();
 
+    /**
+     * Stream handling click item on recyclerView. Is use in viewModel
+     */
     private PublishRelay<AddViewModel.CityClickEvent> cityClickRelay = PublishRelay.create();
 
     private SuccessEventCallback successEvent;
 
+    /**
+     * Indicate whether user add or remove some cities from repo
+     */
     private boolean isDataModified;
 
     private DBManager dbManager;
@@ -95,13 +113,17 @@ public class AddViewModel implements SearchViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError(e -> {
+
+                    //if exception is other than TimeoutException, show stacktrace
                     if (!(e instanceof TimeoutException)) {
                         e.printStackTrace();
                     }
+
+                    //close progress bar and show error popup
                     progressRelay.accept(new ProgressEvent(ProgressEvent.CLOSE));
                     progressRelay.accept(new ProgressEvent(ProgressEvent.ERROR, R.string.error_occured_during_search));
                 })
-                .retry() //if occur any error, subscribe observable again
+                .retry() //error interrupt stream. So if occur any error, subscribe observable again
                 .subscribe(new Observer<List<CityViewModel>>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -110,7 +132,7 @@ public class AddViewModel implements SearchViewModel {
 
                     @Override
                     public void onNext(List<CityViewModel> s) {
-                        recyclerviewVisible.set(!s.isEmpty());
+                        recyclerViewVisible.set(!s.isEmpty());
                         citiesRelay.accept(s);
                         progressRelay.accept(new ProgressEvent(ProgressEvent.CLOSE));
                     }
@@ -148,8 +170,8 @@ public class AddViewModel implements SearchViewModel {
         return progressRelay;
     }
 
-    public ObservableBoolean getRecyclerviewVisible() {
-        return recyclerviewVisible;
+    public ObservableBoolean getRecyclerViewVisible() {
+        return recyclerViewVisible;
     }
 
     public Observable<List<CityViewModel>> getCitiesObservable() {
@@ -160,8 +182,11 @@ public class AddViewModel implements SearchViewModel {
         return this;
     }
 
+    /**
+     * Init listening onClick in result list
+     */
     public void observeCityClick() {
-        cityClickRelay
+        compositeDisposable.add(cityClickRelay
                 .observeOn(Schedulers.io())
                 .flatMapCompletable(event -> {
                     isDataModified = true;
@@ -171,21 +196,7 @@ public class AddViewModel implements SearchViewModel {
                         return dbManager.getCityHelper().remove(event.city);
                     }
                 })
-                .subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
+                .subscribe());
     }
 
     public void setSuccessEvent(SuccessEventCallback successEvent) {
@@ -200,6 +211,9 @@ public class AddViewModel implements SearchViewModel {
         }
     }
 
+    /**
+     * Event emit by cityViewModel when user click
+     */
     public static class CityClickEvent {
         private City city;
 
@@ -219,8 +233,10 @@ public class AddViewModel implements SearchViewModel {
         }
     }
 
+    /**
+     * ViewModel bind data with particular item in recylcerView
+     */
     public static class CityViewModel {
-
         PublishRelay<AddViewModel.CityClickEvent> cityRelay;
 
         public City city;
@@ -239,9 +255,19 @@ public class AddViewModel implements SearchViewModel {
         }
     }
 
+    /**
+     * Using to notify view, that searching end up with success
+     */
     interface SuccessEventCallback {
+
+        /**
+         * When user has modified data
+         */
         void success();
 
+        /**
+         * When user has not modified data
+         */
         void noDataModified();
     }
 }

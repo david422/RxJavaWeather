@@ -4,15 +4,13 @@ import android.databinding.ObservableField;
 
 /**
  * Created by dpodolak on 19.04.2017.
+ *
+ * This interface should be implement by viewModel which handle search view
  */
-
 public interface SearchViewModel {
-
-//    TextWatcher getSearchTextWatcher();
 
     void searchClear();
 
     ObservableField<String> getSearchTextObservable();
-
 
 }

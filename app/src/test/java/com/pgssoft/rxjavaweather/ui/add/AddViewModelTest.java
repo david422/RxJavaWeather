@@ -5,7 +5,6 @@ import android.support.annotation.RequiresApi;
 
 import com.pgssoft.rxjavaweather.ApiDataProvider;
 import com.pgssoft.rxjavaweather.DBManager;
-import com.pgssoft.rxjavaweather.RXApp;
 import com.pgssoft.rxjavaweather.RxJUnitTest;
 import com.pgssoft.rxjavaweather.api.Api;
 import com.pgssoft.rxjavaweather.api.SearchServcie;
@@ -81,14 +80,14 @@ public class AddViewModelTest extends RxJUnitTest{
     @Test
     public void getRecyclerviewVisible() {
 
-        assertEquals(false, addViewModel.getRecyclerviewVisible().get());
+        assertEquals(false, addViewModel.getRecyclerViewVisible().get());
         setQueryOnSearchText("war");
         testScheduler.advanceTimeBy(AddViewModel.CLICK_DEBOUNCE_TIME, TimeUnit.MILLISECONDS);
-        assertEquals(true, addViewModel.getRecyclerviewVisible().get());
+        assertEquals(true, addViewModel.getRecyclerViewVisible().get());
 
         setQueryOnSearchText("tes");
         testScheduler.advanceTimeBy(AddViewModel.CLICK_DEBOUNCE_TIME, TimeUnit.MILLISECONDS);
-        assertEquals(false, addViewModel.getRecyclerviewVisible().get());
+        assertEquals(false, addViewModel.getRecyclerViewVisible().get());
 
     }
 
