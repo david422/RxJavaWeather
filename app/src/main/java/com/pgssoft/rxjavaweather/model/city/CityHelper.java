@@ -10,6 +10,8 @@ import java.util.List;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import timber.log.Timber;
+
 /**
  * Created by dpodolak on 13.04.2017.
  */
@@ -25,7 +27,8 @@ public class CityHelper {
 
     public Completable insert(City city) {
         return Completable.create(e -> {
-            cityDao.insert(city);
+            long id = cityDao.insert(city);
+            Timber.d("City saved: " + id);
             e.onComplete();
         });
     }
@@ -39,6 +42,7 @@ public class CityHelper {
                 WhereCondition nameCondition = CityDao.Properties.Name.eq(city.getName());
                 WhereCondition countryCondition = CityDao.Properties.Country.eq(city.getCountry());
                 List<City> cityToDelete = cityDao.queryBuilder().where(nameCondition, countryCondition).build().list();
+                Timber.d("Cities to delete: " + cityToDelete.size());
                 for (City c : cityToDelete) {
                     c.delete();
                 }

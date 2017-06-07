@@ -24,6 +24,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by dpodolak on 13.04.2017.
@@ -76,6 +77,8 @@ public class AddViewModel implements SearchViewModel {
 
         this.dbManager = dbManager;
         Flowable<City> localCityObserable = dbManager.getCityHelper().getCities();
+
+        observeCityClick();
 
         Observable.create((ObservableOnSubscribe<String>) e ->
                 //listen for every change
@@ -148,8 +151,6 @@ public class AddViewModel implements SearchViewModel {
 
                     }
                 });
-
-        observeCityClick();
     }
 
     public void close() {
@@ -190,6 +191,7 @@ public class AddViewModel implements SearchViewModel {
                 .observeOn(Schedulers.io())
                 .flatMapCompletable(event -> {
                     isDataModified = true;
+                    Timber.d("city selected");
                     if (event.isSelected) {
                         return dbManager.getCityHelper().insert(event.city);
                     } else {
