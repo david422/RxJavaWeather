@@ -41,7 +41,7 @@ public class Api {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         client.addNetworkInterceptor(interceptor);
 
         Gson gson = new GsonBuilder()
