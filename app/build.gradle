@@ -8,7 +8,7 @@ android {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.digitalcaregroup.rxjavaweather"
         minSdkVersion 21
